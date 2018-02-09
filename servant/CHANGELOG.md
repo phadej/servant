@@ -37,6 +37,10 @@
   To migrate from older code, change `ClientEnv` constructor
   to `mkClientEnv` which makes `ClientEnv` without `CookieJar`.
 
+- *servant-client-core* Empty `Request` has `reqPath = "/"`.
+  ([#781](https://github.com/haskell-servant/servant/issues/781)
+   [#904](https://github.com/haskell-servant/servant/pull/904))
+
 - *servant* Mono-kind-ise modifiers, resulting in better error messages.
   ([#887](https://github.com/haskell-servant/servant/issues/887)
    [#890](https://github.com/haskell-servant/servant/pull/890))

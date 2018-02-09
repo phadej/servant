@@ -8,6 +8,9 @@
   ([#836](https://github.com/haskell-servant/servant/pull/836))
 - *servant* Add `Servant.API.Modifiers`
   ([#873](https://github.com/haskell-servant/servant/pull/873))
+- Empty `Request` has `reqPath = "/"`.
+  ([#781](https://github.com/haskell-servant/servant/issues/781)
+   [#904](https://github.com/haskell-servant/servant/pull/904))
 
 0.12
 ----

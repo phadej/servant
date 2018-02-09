@@ -11,6 +11,9 @@
 - *servant-client* Support `http-client`’s `CookieJar`
   ([#897](https://github.com/haskell-servant/servant/pull/897)
    [#883](https://github.com/haskell-servant/servant/pull/883))
+- *servant-client-core* Empty `Request` has `reqPath = "/"`.
+  ([#781](https://github.com/haskell-servant/servant/issues/781)
+   [#904](https://github.com/haskell-servant/servant/pull/904))
 
 0.12.0.1
 --------
