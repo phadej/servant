@@ -65,6 +65,8 @@ import           Network.HTTP.Types                         hiding
                  (Header, ResponseHeaders)
 import           Network.Socket
                  (SockAddr)
+import           Network.URI
+                 (URI, uriToString)
 import           Network.Wai
                  (Application, Request, httpVersion, isSecure, lazyRequestBody,
                  rawQueryString, remoteHost, requestHeaders, requestMethod,
@@ -76,10 +78,10 @@ import           Servant.API
                  BoundaryStrategy (..), Capture', CaptureAll, Description,
                  EmptyAPI, FramingRender (..), Header', If, IsSecure (..),
                  NoContent (..), QueryFlag, QueryParam', QueryParams, Raw,
-                 ReflectMethod (reflectMethod), RemoteHost, ReqBody', Result,
-                 SBool (..), SBoolI (..), Stream, StreamGenerator (..),
-                 Summary, ToStreamGenerator (..), Vault, Verb',
-                 WithNamedContext)
+                 Redirect (..), ReflectMethod (reflectMethod), RemoteHost,
+                 ReqBody', Result, SBool (..), SBoolI (..), Stream,
+                 StreamGenerator (..), Summary, ToStreamGenerator (..), Vault,
+                 Verb', WithNamedContext)
 import           Servant.API.ContentTypes
                  (AcceptHeader (..), AllCTRender (..), AllCTUnrender (..),
                  AllMime, MimeRender (..), canHandleAcceptH)
@@ -367,6 +369,30 @@ instance KnownNat status => HasServerR (NoContent status) where
       where
         headers = []
         status = toEnum . fromInteger $ natVal (Proxy :: Proxy status)
+
+instance HasServerR Redirect where
+    type ServerR Redirect = Redirect
+
+    routeR _proxy _context _request = routeResultR $ \(Redirect uri) ->
+        Route $ redirectResponse uri
+
+instance HasServerR api => HasServerR (Redirect :> api) where
+    type ServerR (Redirect :> api) = Either Redirect (ServerR api)
+
+    routeR _proxy context request = mapRouteResultR handler $
+        routeR (Proxy :: Proxy api) context request
+      where
+        handler
+            :: (ServerR api -> RouteResult Wai.Response)
+            -> Either Redirect (ServerR api)
+            -> RouteResult Wai.Response
+        handler f (Right x)             = f x
+        handler _ (Left (Redirect uri)) = Route $ redirectResponse uri
+
+redirectResponse :: URI -> Wai.Response
+redirectResponse uri = responseLBS status [hdr] mempty where
+    status = status301 -- moved permanently
+    hdr    = ("Location", cs $ uriToString id uri "")
 
 instance (HasServerR api, GetHeaders' hs) => HasServerR (Headers hs :> api) where
     type ServerR (Headers hs :> api) = Headers hs (ServerR api)

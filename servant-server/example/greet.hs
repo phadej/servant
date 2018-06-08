@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeFamilies      #-}
 {-# LANGUAGE TypeOperators     #-}
 
-import           Data.Aeson
+import           Data.Aeson hiding (Result)
 import           Data.Monoid
 import           Data.Proxy
 import           Data.Text
@@ -25,9 +25,17 @@ instance FromJSON Greet
 instance ToJSON Greet
 
 -- API specification
-type TestApi =
-       -- GET /hello/:name?capital={true, false}  returns a Greet as JSON
-       "hello" :> Capture "name" Text :> QueryParam "capital" Bool :> Get '[JSON] Greet
+
+-- GET /hello/:name?capital={true, false)
+-- returns a Greet as JSON or redirects
+type HelloEndpoint =
+    "hello" :> Capture "name" Text :> QueryParam "capital" Bool :>
+        Verb' 'GET (Redirect :> Result 200 '[JSON] Greet)
+
+helloEndpoint :: Proxy HelloEndpoint
+helloEndpoint = Proxy
+
+type TestApi = HelloEndpoint
 
        -- POST /greet with a Greet as JSON in the request body,
        --             returns a Greet as JSON
@@ -48,9 +56,13 @@ testApi = Proxy
 server :: Server TestApi
 server = helloH :<|> postGreetH :<|> deleteGreetH
 
-  where helloH name Nothing = helloH name (Just False)
-        helloH name (Just False) = return . Greet $ "Hello, " <> name
-        helloH name (Just True) = return . Greet . toUpper $ "Hello, " <> name
+  where helloH "foo" p = return . Left $ Redirect $
+            linkURI $ safeLink testApi helloEndpoint "bar" p
+
+        helloH name Nothing = helloH name (Just False)
+        helloH name (Just False) = return . Right . Greet $ "Hello, " <> name
+        helloH name (Just True) = return . Right . Greet . toUpper $ "Hello, " <> name
+
 
         postGreetH greet = return greet
 
@@ -70,5 +82,7 @@ runTestServer port = run port test
 -- Put this all to work!
 main :: IO ()
 main = do
-    putStrLn "Try: curl http://localhost:8001/hello/world"
+    putStrLn "Try for example:"
+    putStrLn "curl http://localhost:8001/hello/world"
+    putStrLn "curl -D - 'http://localhost:8001/hello/foo?capital=true'"
     runTestServer 8001

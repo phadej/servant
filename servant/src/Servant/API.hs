@@ -52,6 +52,8 @@ module Servant.API (
 
   -- * Response Headers
   module Servant.API.ResponseHeaders,
+  -- * Redirect
+  module Servant.API.Redirect,
 
   -- * Untyped endpoints
   module Servant.API.Raw,
@@ -87,8 +89,7 @@ import           Servant.API.Capture
                  (Capture, Capture', CaptureAll)
 import           Servant.API.ContentTypes
                  (Accept (..), FormUrlEncoded, JSON, MimeRender (..),
-                 MimeUnrender (..), OctetStream,
-                 PlainText)
+                 MimeUnrender (..), OctetStream, PlainText)
 import           Servant.API.Description
                  (Description, Summary)
 import           Servant.API.Empty
@@ -109,6 +110,8 @@ import           Servant.API.QueryParam
                  (QueryFlag, QueryParam, QueryParam', QueryParams)
 import           Servant.API.Raw
                  (Raw)
+import           Servant.API.Redirect
+                 (Redirect (..))
 import           Servant.API.RemoteHost
                  (RemoteHost)
 import           Servant.API.ReqBody

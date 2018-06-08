@@ -54,6 +54,7 @@ library
     Servant.API.NoContent
     Servant.API.QueryParam
     Servant.API.Raw
+    Servant.API.Redirect
     Servant.API.RemoteHost
     Servant.API.ReqBody
     Servant.API.ResponseHeaders
