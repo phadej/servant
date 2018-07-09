@@ -32,3 +32,6 @@ constraints:
 allow-newer:
   servant-pagination:servant,
   servant-pagination:servant-server
+
+packages:    cabal-doctest-cli/
+allow-newer: cabal-plan:aeson
